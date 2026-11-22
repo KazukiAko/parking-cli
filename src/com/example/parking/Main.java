@@ -2,10 +2,10 @@ package com.example.parking;
 
 import com.example.parking.model.Reservation;
 import com.example.parking.repository.ReservationRepository;
+import com.example.parking.validation.ReservationValidator;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Scanner;
 
@@ -51,26 +51,24 @@ public class Main {
 
     private static void handleRegister(Scanner scanner, ReservationRepository repository) {
         System.out.print("区画番号（例: A-01）> ");
-        String spotCode = scanner.nextLine().trim();
+        String rawSpotCode = scanner.nextLine();
 
         System.out.print("車両番号（例: 横浜 500 あ 12-34）> ");
-        String vehicleNumber = scanner.nextLine().trim();
+        String rawVehicleNumber = scanner.nextLine();
 
         System.out.print("予約日（YYYY-MM-DD、例: 2026-11-25）> ");
-        String dateText = scanner.nextLine().trim();
-
-        if (spotCode.isEmpty() || vehicleNumber.isEmpty() || dateText.isEmpty()) {
-            System.out.println("空欄の項目があるため登録をキャンセルしました。");
-            return;
-        }
+        String rawDateText = scanner.nextLine();
 
         try {
-            LocalDate reservedDate = LocalDate.parse(dateText);
+            String spotCode = ReservationValidator.normalizeAndValidateSpotCode(rawSpotCode);
+            String vehicleNumber = ReservationValidator.normalizeAndValidateVehicleNumber(rawVehicleNumber);
+            LocalDate reservedDate = ReservationValidator.parseReservedDate(rawDateText);
+
             Reservation reservation = new Reservation(spotCode, vehicleNumber, reservedDate);
             repository.save(reservation);
             System.out.println("登録しました。");
-        } catch (DateTimeParseException e) {
-            System.out.println("日付形式が不正です。YYYY-MM-DD で入力してください。");
+        } catch (IllegalArgumentException e) {
+            System.out.println("入力エラー: " + e.getMessage());
         } catch (SQLException e) {
             System.out.println("DB登録エラー: " + e.getMessage());
         }
