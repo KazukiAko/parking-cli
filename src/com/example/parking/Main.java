@@ -14,7 +14,7 @@ public class Main {
     public static void main(String[] args) {
         ReservationRepository repository = new ReservationRepository();
 
-        try (Scanner scanner = new Scanner(System.in)) {
+        try (Scanner scanner = new Scanner(System.in, "MS932")) {
             boolean running = true;
 
             while (running) {

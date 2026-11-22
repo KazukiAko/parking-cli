@@ -29,3 +29,6 @@ replay_pid*
 
 # config
 config/db.properties
+
+# Build artifacts
+artifacts/
